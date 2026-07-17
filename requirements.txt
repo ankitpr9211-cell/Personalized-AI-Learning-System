@@ -3,7 +3,11 @@ langchain
 langchain-community
 langchain-groq
 chromadb
-pypdf
 sentence-transformers
+pypdf
+pypdf2
+pypdfium2
 huggingface-hub
+transformers
+torch
 python-dotenv
