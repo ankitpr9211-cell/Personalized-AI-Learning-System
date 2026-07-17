@@ -234,7 +234,7 @@ light.style.top = e.clientY-140 + "px"
 # =========================
 # GROQ API KEY
 # =========================
-GROQ_API_KEY = ""GROQ_API_KEY"" 
+GROQ_API_KEY = "GROQ_API_KEY" 
 
 # =========================
 # CREATE FOLDERS
