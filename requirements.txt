@@ -1,18 +1,15 @@
-streamlit==1.37.0
+streamlit>=1.37
 
-langchain==0.2.16
-langchain-community==0.2.16
-langchain-core==0.2.39
-langchain-text-splitters==0.2.4
-langchain-groq==0.1.10
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+langchain-groq
 
-chromadb==0.5.5
+chromadb
 
-sentence-transformers==3.0.1
-transformers==4.44.2
-huggingface-hub==0.24.6
-torch
+sentence-transformers
 
-pypdf==4.3.1
-python-dotenv==1.0.1
-tiktoken==0.7.0
+pypdf
+
+python-dotenv
