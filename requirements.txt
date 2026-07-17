@@ -1,19 +1,15 @@
 streamlit==1.45.1
-
 langchain==0.3.27
 langchain-community==0.3.27
 langchain-core==0.3.72
 langchain-text-splitters==0.3.9
 langchain-groq==0.3.7
-
 chromadb==1.0.15
-
 sentence-transformers==5.0.0
 transformers==4.53.2
 huggingface-hub==0.34.4
-
-torch
-
 pypdf==5.8.0
-
 python-dotenv==1.1.1
+pysqlite3-binary
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.4.1
