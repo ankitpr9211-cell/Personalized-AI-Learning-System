@@ -11,9 +11,17 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_groq import ChatGroq
 from langchain.chains import RetrievalQA
 
+st.set_page_config(
+    page_title="Ultimate AI Study Assistant",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # =========================
 # PAGE CONFIG
 # =========================
+
 st.markdown("""
 <style>
 
@@ -234,7 +242,7 @@ light.style.top = e.clientY-140 + "px"
 # =========================
 # GROQ API KEY
 # =========================
-GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+GROQ_API_KEY = st.secrets["Your_API"]
 
 # =========================
 # CREATE FOLDERS
@@ -324,7 +332,8 @@ elif menu == "Chat with PDF":
         question = st.text_input("Ask question from PDF")
         if question:
             with st.spinner("🤖 Searching answer..."):
-                answer = qa.run(question)
+                response = qa.invoke({"query": question})
+            st.write(response["result"])
             st.success("Answer Found")
             st.write(answer)
 

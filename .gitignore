@@ -1,0 +1,12 @@
+documents/
+vector_db/
+study_progress.json
+study_plan.json
+
+__pycache__/
+*.pyc
+
+.env
+.streamlit/secrets.toml
+
+.venv/
