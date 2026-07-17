@@ -1,3 +1,10 @@
+# =========================
+# SQLITE3 PATCH (must be first, before chromadb/Chroma import)
+# =========================
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import os
 import streamlit as st
 import json
@@ -19,9 +26,8 @@ st.set_page_config(
 )
 
 # =========================
-# PAGE CONFIG
+# STYLING
 # =========================
-
 st.markdown("""
 <style>
 
@@ -239,6 +245,7 @@ light.style.top = e.clientY-140 + "px"
 </script>
 
 """, unsafe_allow_html=True)
+
 # =========================
 # GROQ API KEY
 # =========================
@@ -279,19 +286,23 @@ Built with:
 )
 
 # =========================
-# LOAD AI MODEL
+# LOAD AI MODEL + EMBEDDINGS (cached so they don't reload every rerun)
 # =========================
-llm = ChatGroq(
-    groq_api_key=GROQ_API_KEY,
-    model_name="llama-3.1-8b-instant"
-)
+@st.cache_resource
+def load_llm():
+    return ChatGroq(
+        groq_api_key=GROQ_API_KEY,
+        model_name="llama-3.1-8b-instant"
+    )
 
-# =========================
-# EMBEDDINGS MODEL
-# =========================
-embeddings = HuggingFaceEmbeddings(
-    model_name="all-MiniLM-L6-v2"
-)
+@st.cache_resource
+def load_embeddings():
+    return HuggingFaceEmbeddings(
+        model_name="all-MiniLM-L6-v2"
+    )
+
+llm = load_llm()
+embeddings = load_embeddings()
 
 # =========================
 # ASK AI
@@ -307,6 +318,8 @@ if menu == "Ask AI":
                 result = llm.invoke(prompt)
             st.success("Answer Generated")
             st.write(result.content)
+        else:
+            st.warning("Please enter a question first.")
 
 # =========================
 # CHAT WITH PDF
@@ -314,28 +327,36 @@ if menu == "Ask AI":
 elif menu == "Chat with PDF":
     st.subheader("📚 Chat With Your PDF")
     uploaded_file = st.file_uploader("Upload PDF", type="pdf")
+
     if uploaded_file:
         file_path = os.path.join("documents", uploaded_file.name)
         with open(file_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
-        st.success("PDF Uploaded Successfully")
 
-        with st.spinner("🤖 Reading PDF..."):
-            loader = PyPDFLoader(file_path)
-            docs = loader.load()
-            splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-            documents = splitter.split_documents(docs)
-            vectordb = Chroma.from_documents(documents, embedding=embeddings, persist_directory="vector_db")
-            retriever = vectordb.as_retriever()
-            qa = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
+        # Only re-process the PDF when a NEW file is uploaded,
+        # not on every rerun triggered by typing a question.
+        if st.session_state.get("last_pdf") != uploaded_file.name:
+            with st.spinner("🤖 Reading PDF..."):
+                loader = PyPDFLoader(file_path)
+                docs = loader.load()
+                splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+                documents = splitter.split_documents(docs)
+                vectordb = Chroma.from_documents(
+                    documents, embedding=embeddings, persist_directory="vector_db"
+                )
+                retriever = vectordb.as_retriever()
+                st.session_state["qa"] = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
+                st.session_state["last_pdf"] = uploaded_file.name
+            st.success("PDF processed successfully")
+        else:
+            st.info(f"Using previously processed file: {uploaded_file.name}")
 
         question = st.text_input("Ask question from PDF")
         if question:
             with st.spinner("🤖 Searching answer..."):
-                response = qa.invoke({"query": question})
-            st.write(response["result"])
+                response = st.session_state["qa"].invoke({"query": question})
             st.success("Answer Found")
-            st.write(answer)
+            st.write(response["result"])
 
 # =========================
 # QUIZ GENERATOR
@@ -362,6 +383,8 @@ elif menu == "Quiz Generator":
                 result = llm.invoke(prompt)
             st.success("Quiz Generated")
             st.write(result.content)
+        else:
+            st.warning("Please enter a topic first.")
 
 # =========================
 # STUDY PLANNER + STREAK + NEXT TOPIC
