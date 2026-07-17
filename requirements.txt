@@ -11,6 +11,6 @@ sentence-transformers
 huggingface-hub
 transformers
 torch
-
 pypdf
 python-dotenv
+tiktoken
